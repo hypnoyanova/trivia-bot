@@ -113,21 +113,22 @@ controller.hears(
             var category = '*Category:* ' + json[0].category.title,
                 question = json[0].question + ' ' + json[0].answer,
                 botAsks = {
-                 "attachments": [
-                    {
-                        "title": "Question",
-                        "pretext": category,
-                        "text": question,
-                        "color": "#7CD197",
-                        "mrkdwn_in": [
-                            "text",
-                            "pretext"
-                        ]
-                    }
-                ]
-            };
-            bot.startConversation(message, function trivia(err,convo) {
-                convo.ask(botAsks, [
+                    "attachments": [
+                        {
+                            "title": "Question",
+                            "pretext": category,
+                            "text": question,
+                            "color": "#7CD197",
+                            "mrkdwn_in": [
+                                "text",
+                                "pretext"
+                            ]
+                        }
+                    ]
+                };
+                
+                function trivia(err, convo) {
+                    convo.ask(botAsks, [
                 {
                     pattern: json[0].answer,
                     callback: function(response,convo) {
@@ -158,8 +159,9 @@ controller.hears(
                     }
                 }
             ]);
-        })
-    })
+                }
+                
+            bot.startConversation(message, trivia(err, convo));
 });
 
 
