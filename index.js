@@ -93,6 +93,13 @@ controller.hears(
     }
 );
 
+controller.hears(
+    ['bye', 'see you', 'good night'],
+    function(bot,message) {
+        bot.reply(message,'See you later!');
+    }
+);
+
 
 /**
  * AN example of what could be:
