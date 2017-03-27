@@ -110,11 +110,12 @@ controller.hears(
             if (err) {
                 throw err;
             }
+            let category = '*Category:* ' + json[0].category.title;
             bot.reply(message, {
                  "attachments": [
                     {
                         "title": "Question",
-                        "pretext": json[0].category.title,
+                        "pretext": category,
                         "text": json[0].question,
                         "mrkdwn_in": [
                             "text",
