@@ -111,9 +111,8 @@ controller.hears(
                 throw err;
             }
             var category = '*Category:* ' + json[0].category.title,
-                question = json[0].question + ' ' + json[0].answer;
-            bot.startConversation(message, function trivia(err,convo) {
-                convo.ask({
+                question = json[0].question + ' ' + json[0].answer,
+                botAsks = {
                  "attachments": [
                     {
                         "title": "Question",
@@ -126,7 +125,9 @@ controller.hears(
                         ]
                     }
                 ]
-            }, [
+            };
+            bot.startConversation(message, function trivia(err,convo) {
+                convo.ask(botAsks, [
                 {
                     pattern: json[0].answer,
                     callback: function(response,convo) {
@@ -137,7 +138,7 @@ controller.hears(
                 {
                     pattern: 'next',
                     callback: function(response,convo) {
-                        bot.startConversation(message,trivia(err,convo));
+                        botAsks;
                         convo.next();
                     }
                 },
