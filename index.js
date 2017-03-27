@@ -101,6 +101,20 @@ controller.hears(
     }
 );
 
+controller.hears(
+    ['play'],
+    ['direct_mention', 'mention', 'direct_message'],
+    function(bot,message) {
+        var request = require('request');
+        request('http://jservice.io//api/random', function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var info = JSON.parse(body);
+                bot.reply(message, info.question);
+            }
+        })
+    }
+);
+
 
 /**
  * AN example of what could be:
