@@ -110,20 +110,39 @@ controller.hears(
             if (err) {
                 throw err;
             }
-            var category = '*Category:* ' + json[0].category.title;
-            bot.reply(message, {
+            var category = '*Category:* ' + json[0].category.title,
+                question = json[0].question + ' ' + json[0].answer;
+            bot.startConversation(message, function(err,convo) {
+                convo.ask({
                  "attachments": [
                     {
                         "title": "Question",
                         "pretext": category,
-                        "text": json[0].question,
+                        "text": question,
+                        "color": "#7CD197",
                         "mrkdwn_in": [
                             "text",
                             "pretext"
                         ]
                     }
                 ]
-            })
+            }, [
+                {
+                    pattern: json[0].answer,
+                    callback: function(response,convo) {
+                        convo.say('Correct!');
+                        convo.next();
+                    }
+                },
+                {
+                    default: true,
+                    callback: function(response,convo) {
+                    // just repeat the question
+                        convo.repeat();
+                        convo.next();
+                    }
+                }
+            ]);
         })
     }
 );
