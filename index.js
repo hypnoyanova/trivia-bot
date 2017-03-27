@@ -112,7 +112,7 @@ controller.hears(
             }
             var category = '*Category:* ' + json[0].category.title,
                 question = json[0].question + ' ' + json[0].answer;
-            bot.startConversation(message, function(err,convo) {
+            bot.startConversation(message, function trivia(err,convo) {
                 convo.ask({
                  "attachments": [
                     {
@@ -131,6 +131,20 @@ controller.hears(
                     pattern: json[0].answer,
                     callback: function(response,convo) {
                         convo.say('Correct!');
+                        convo.next();
+                    }
+                },
+                {
+                    pattern: 'next',
+                    callback: function(response,convo) {
+                        bot.startConversation(message,trivia(err,convo));
+                        convo.next();
+                    }
+                },
+                {
+                    pattern: 'stop',
+                    callback: function(response,convo) {
+                        convo.say('Have a nice day!');
                         convo.next();
                     }
                 },
