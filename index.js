@@ -110,18 +110,19 @@ controller.hears(
             if (err) {
                 throw err;
             }
-        bot.reply(message, {
-            "attachments": [
-                {
-                    "title": "Title",
-                    "pretext": ["Category: ", json[0].category.title],
-                    "text": json[0].question,
-                    "mrkdwn_in": [
-                        "text",
-                        "pretext"
-                    ]
-                }
-            ]
+            bot.reply(message, {
+                 "attachments": [
+                    {
+                        "title": "Title",
+                        "pretext": ["Category: ", json[0].category.title],
+                        "text": json[0].question,
+                        "mrkdwn_in": [
+                            "text",
+                            "pretext"
+                        ]
+                    }
+                ]
+            })
         })
     }
 );
