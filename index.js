@@ -127,43 +127,42 @@ controller.hears(
                     ]
                 };
                 
-                function trivia(err, convo) {
+                bot.startConversation(message, function (err, convo) {
                     convo.ask(botAsks, [
-                {
-                    pattern: json[0].answer,
-                    callback: function(response,convo) {
-                        convo.say('Correct!');
-                        convo.next();
-                    }
-                },
-                {
-                    pattern: 'next',
-                    callback: function(response,convo) {
-                        botAsks;
-                        convo.next();
-                    }
-                },
-                {
-                    pattern: 'stop',
-                    callback: function(response,convo) {
-                        convo.say('Have a nice day!');
-                        convo.next();
-                    }
-                },
-                {
-                    default: true,
-                    callback: function(response,convo) {
-                    // just repeat the question
-                        convo.repeat();
-                        convo.next();
-                    }
-                }
-            ]);
-                }
+                        {
+                            pattern: json[0].answer,
+                            callback: function(response,convo) {
+                                convo.say('Correct!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: 'next',
+                            callback: function(response,convo) {
+                                botAsks;
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: 'stop',
+                            callback: function(response,convo) {
+                                convo.say('Have a nice day!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function(response,convo) {
+                            // just repeat the question
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }
+                    ]);
+                });
                 
-            bot.startConversation(message, trivia(err, convo));
+        });
     });
-});
 
 
 /**
