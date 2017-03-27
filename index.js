@@ -110,7 +110,7 @@ controller.hears(
             if (err) {
                 throw err;
             }
-            let category = '*Category:* ' + json[0].category.title;
+            var category = '*Category:* ' + json[0].category.title;
             bot.reply(message, {
                  "attachments": [
                     {
