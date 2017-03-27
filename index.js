@@ -95,6 +95,7 @@ controller.hears(
 
 controller.hears(
     ['bye', 'see you', 'good night'],
+    ['direct_mention', 'mention', 'direct_message'],
     function(bot,message) {
         bot.reply(message,'See you later!');
     }
