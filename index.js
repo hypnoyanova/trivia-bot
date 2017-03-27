@@ -162,6 +162,7 @@ controller.hears(
                 }
                 
             bot.startConversation(message, trivia(err, convo));
+    });
 });
 
 
