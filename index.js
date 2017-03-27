@@ -106,10 +106,11 @@ controller.hears(
     ['direct_mention', 'mention', 'direct_message'],
     function(bot,message) {
         var request = require('request');
-        request('http://jservice.io//api/random', function (error, response, body) {
-            if (!error && response.statusCode == 200) {
-                bot.reply(message, body[0].question);
+        request({url: 'http://jservice.io//api/random', json: true}, function (err, res, json) {
+            if (err) {
+                throw err;
             }
+        bot.reply(message, json[0].question);
         })
     }
 );
