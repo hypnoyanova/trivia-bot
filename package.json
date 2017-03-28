@@ -1,7 +1,7 @@
 {
-  "name": "easy-peasy-bot",
+  "name": "trivia-bot",
   "version": "1.0.0",
-  "description": "The awesomest bot evar.",
+  "description": "Trivia bot for Slack",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hypnoyanova/easy-peasy-bot.git"
+    "url": "git+https://github.com/hypnoyanova/trivia-bot.git"
   },
   "keywords": [
     "slack",
