@@ -111,7 +111,7 @@ controller.hears(
                 throw err;
             }
             var category = '*Category:* ' + json[0].category.title,
-                question = json[0].question + ' ' + json[0].answer,
+                question = json[0].question + ' ' + json[0].answer, // provide answer for testing, obviously will be removed
                 botAsks = {
                     "attachments": [
                         {
@@ -127,35 +127,43 @@ controller.hears(
                     ]
                 };
                 
-                bot.startConversation(message, function (err, convo) {
+                bot.createConversation(message, function (err, convo) {
+                    if (err) {
+                        throw err;
+                    }
+                    
+                    convo.addMessage(botAsks, 'next_thread');
+                    convo.addMessage('Have a nice day!', 'stop_thread');
+                    convo.addMessage({
+                        text: 'Try again',
+                        action: convo.repeat(),
+                        },'repeat_thread')
+                    
                     convo.ask(botAsks, [
                         {
                             pattern: json[0].answer,
                             callback: function(response,convo) {
                                 convo.say('Correct!');
-                                convo.next();
+                                convo.gotoThread('next_thread');
                             }
                         },
                         {
                             pattern: 'next',
                             callback: function(response,convo) {
-                                botAsks;
-                                convo.next();
+                                convo.gotoThread('next_thread');
                             }
                         },
                         {
                             pattern: 'stop',
                             callback: function(response,convo) {
-                                convo.say('Have a nice day!');
-                                convo.next();
+                                convo.gotoThread('stop_thread');
                             }
                         },
                         {
                             default: true,
                             callback: function(response,convo) {
                             // just repeat the question
-                                convo.repeat();
-                                convo.next();
+                                convo.gotoThread('repeat_thread');
                             }
                         }
                     ]);
