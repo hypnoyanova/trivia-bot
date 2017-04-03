@@ -104,21 +104,51 @@ controller.hears(
 controller.hears(
     ['play'],
     ['direct_mention', 'mention', 'direct_message'],
-    function(bot,message) {
+    function trivia (bot,message) {
         var request = require('request');
         request({url: 'http://jservice.io//api/random', json: true}, function (err, res, json) {
             if (err) {
                 throw err;
             }
             var category = '*Category:* ' + json[0].category.title,
-                question = json[0].question + ' ' + json[0].answer, // provide answer for testing, obviously will be removed
+                question = json[0].question + ' _' + json[0].answer + '_', // provide answer for testing, obviously will be removed
+                callbacks = [
+                        {
+                            pattern: json[0].answer,
+                            callback: function(response,convo) {
+                                convo.say('Correct!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: 'next',
+                            callback: function(response,convo) {
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: 'stop',
+                            callback: function(response,convo) {
+                                convo.say('Have a nice day!');
+                                convo.next();
+                            }
+                        },
+                        {
+                            default: true,
+                            callback: function(response,convo) {
+                            // just repeat the question
+                                convo.repeat();
+                                convo.next();
+                            }
+                        }
+                    ],
                 botAsks = {
                     "attachments": [
                         {
                             "title": "Question",
                             "pretext": category,
                             "text": question,
-                            "color": "#7CD197",
+                            "color": "#32BEA6",
                             "mrkdwn_in": [
                                 "text",
                                 "pretext"
@@ -127,48 +157,43 @@ controller.hears(
                     ]
                 };
                 
-                bot.createConversation(message, function (err, convo) {
-                    if (err) {
-                        throw err;
-                    }
-                    
-                    convo.addMessage(botAsks, 'next_thread');
-                    convo.addMessage('Have a nice day!', 'stop_thread');
-                    convo.addMessage({
-                        text: 'Try again',
-                        action: convo.repeat(),
-                        },'repeat_thread')
-                    
-                    convo.ask(botAsks, [
+                bot.startConversation(message, function (err, convo) {
+                        convo.ask(botAsks, [
                         {
                             pattern: json[0].answer,
                             callback: function(response,convo) {
                                 convo.say('Correct!');
-                                convo.gotoThread('next_thread');
+                                trivia(bot, message);
+                                convo.next();
                             }
                         },
                         {
                             pattern: 'next',
                             callback: function(response,convo) {
-                                convo.gotoThread('next_thread');
+                                trivia(bot, message);
+                                convo.next();
                             }
                         },
                         {
                             pattern: 'stop',
                             callback: function(response,convo) {
-                                convo.gotoThread('stop_thread');
+                                convo.say('Have a nice day!');
+                                convo.next();
                             }
                         },
                         {
                             default: true,
                             callback: function(response,convo) {
                             // just repeat the question
-                                convo.gotoThread('repeat_thread');
+                                convo.say("Let's try this again");
+                                convo.repeat(); // change to silentRepeat ?
+                                convo.next();
                             }
                         }
                     ]);
+                  
                 });
-                
+            
         });
     });
 
