@@ -105,43 +105,54 @@ controller.hears(
     ['play'],
     ['direct_mention', 'mention', 'direct_message'],
     function trivia (bot,message) {
-        var request = require('request');
+        const request = require('request');
+        const lmgtfy = require('lmgtfy');
+        
         request({url: 'http://jservice.io//api/random', json: true}, function (err, res, json) {
-            if (err) {
-                throw err;
+            if (err) throw err;
+            
+            // answer can look like '(foo) bar', 'foo (or bar)' '<i>foo bar</i>' which prevents it from being accepted, the func to get rid of that
+            // also makes articles unnecessary
+            // not sure if there're other unacceptable answers
+            function getAnswer() { // returns e.g. [boo, bar]
+                var answer = '',
+                    secondAnswer = '';
+                    
+                if (json[0].answer.startsWith('<')) {
+                    var indx1 = json[0].answer.indexOf('>'),
+                        indx2 = json[0].answer.lastIndexOf('<');
+                    answer = json[0].answer.slice(indx1 + 1, indx2);
+                    return [answer, secondAnswer];
+                } else if (json[0].answer.startsWith('(')) {
+                    var indx = json[0].answer.indexOf(')');
+                    answer = json[0].answer.slice(1, indx);
+                    secondAnswer = json[0].answer.slice(indx + 2);
+                    return [answer, secondAnswer];
+                } else if(json[0].answer.endsWith(')')) {
+                    var ind1 = json[0].answer.indexOf('('),
+                        ind2 = json[0].answer.indexOf(')');
+                    answer = json[0].answer.slice(0, ind1 - 2);
+                    secondAnswer = json[0].answer.slice(ind1 + 4, ind2 - 1);
+                    return [answer, secondAnswer];
+                } else if (json[0].answer.startsWith('a')) {
+                    answer = json[0].answer;
+                    secondAnswer = json[0].answer.slice(2);
+                    return [answer, secondAnswer];
+                } else if (json[0].answer.startsWith('the')) {
+                    answer = json[0].answer;
+                    secondAnswer = json[0].answer.slice(4);
+                    return [answer, secondAnswer];
+                } else {
+                    answer = json[0].answer;
+                    return [answer];
+                }
             }
+            
+            var answers = getAnswer();
+            
             var category = '*Category:* ' + json[0].category.title,
-                question = json[0].question + ' _' + json[0].answer + '_', // provide answer for testing, obviously will be removed
-                callbacks = [
-                        {
-                            pattern: json[0].answer,
-                            callback: function(response,convo) {
-                                convo.say('Correct!');
-                                convo.next();
-                            }
-                        },
-                        {
-                            pattern: 'next',
-                            callback: function(response,convo) {
-                                convo.next();
-                            }
-                        },
-                        {
-                            pattern: 'stop',
-                            callback: function(response,convo) {
-                                convo.say('Have a nice day!');
-                                convo.next();
-                            }
-                        },
-                        {
-                            default: true,
-                            callback: function(response,convo) {
-                            // just repeat the question
-                                convo.repeat();
-                                convo.next();
-                            }
-                        }
-                    ],
+                question = json[0].question + ' *' + json[0].answer + '*', // provide answer for testing, obviously will be removed
+                attempts = 3,
                 botAsks = {
                     "attachments": [
                         {
@@ -158,9 +169,19 @@ controller.hears(
                 };
                 
                 bot.startConversation(message, function (err, convo) {
+                    if (err) throw err;
+                    
                         convo.ask(botAsks, [
                         {
-                            pattern: json[0].answer,
+                            pattern: answers[0],
+                            callback: function(response,convo) {
+                                convo.say('Correct!');
+                                trivia(bot, message);
+                                convo.next();
+                            }
+                        },
+                        {
+                            pattern: answers[1],
                             callback: function(response,convo) {
                                 convo.say('Correct!');
                                 trivia(bot, message);
@@ -184,9 +205,30 @@ controller.hears(
                         {
                             default: true,
                             callback: function(response,convo) {
-                            // just repeat the question
-                                convo.say("Let's try this again");
-                                convo.repeat(); // change to silentRepeat ?
+                                attempts--;
+                                if (attempts == 0) {
+                                    convo.ask('The answer is: *' + json[0].answer + '*\n\nDo you want to learn about it?', [
+                                        {
+                                            pattern: bot.utterances.yes,
+                                            callback: function(response, convo) {
+                                                convo.say('Let me google it for you!');
+                                                convo.say(lmgtfy(json[0].answer));
+                                                convo.next();
+                                            }
+                                        },
+                                        {
+                                            pattern: bot.utterances.no,
+                                            callback: function(response, convo) {
+                                                convo.say('Ok! See you!');
+                                                convo.next();
+                                            }
+                                        }
+                                        ]);
+                                    convo.next();
+                                } else {
+                                    convo.say("Nope, try again. " + attempts + ' attempts left.');
+                                    convo.repeat(); // silentRepeat doesn't work :(
+                                }
                                 convo.next();
                             }
                         }
